@@ -1,99 +1,175 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Skyscanner Flight Search API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This project provides an API to search for round-trip flights using data from the Skyscanner RapidAPI endpoint. It also allows detection of a user's country configuration and includes Swagger documentation for ease of reference.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **Flight Search (POST /search-flight)**:  
+  Searches for round-trip flights based on the provided origin, destination, departure date, and return date. Additional options such as number of adults/children/infants, cabin class, currency, and market can also be configured.
+  
+- **Country Detection (GET /location/detect)**:  
+  Based on the user's IP or pre-configured logic, returns a country configuration containing market, locale, and currency details suitable for performing flight searches.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Swagger Documentation (GET /docs)**:  
+  Browse the API specification and test endpoints through the integrated Swagger UI.
 
-## Project setup
+- **Validation**:  
+  Input validation for dates and query parameters ensures that departure and return dates are valid and not in the past.
 
-```bash
-$ npm install
+- **Integration Tests & E2E Testing**:  
+  The project includes tests to validate business logic and end-to-end behavior.
+
+## Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone git@github.com:samsllim/skyscanner3-flight-search.git
+   cd skyscanner3-flight-search
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Compile and run the project**:
+   ```bash
+  # development
+  $ npm run start
+
+  # watch mode
+  $ npm run start:dev
+
+  # production mode
+  $ npm run start:prod
+   ```
+
+  By default, the server runs on `http://localhost:3000`.
+
+## Environment Setup
+
+You must provide RapidAPI credentials in a `.env` file located at the project root. For example:
+
+```env
+RAPIDAPI_HOST=your_rapidapi_host
+RAPIDAPI_KEY=your_rapidapi_key
 ```
 
-## Compile and run the project
+These credentials are used by the application to call Skyscanner’s RapidAPI endpoints.
 
-```bash
-# development
-$ npm run start
+## API Endpoints
 
-# watch mode
-$ npm run start:dev
+### 1. POST `/search-flight`
 
-# production mode
-$ npm run start:prod
+**Description**:  
+Search for round-trip flights using the Skyscanner RapidAPI integration.
+
+**Request Body Example**:
+```json
+{
+  "originQuery": "Kuala Lumpur",
+  "destinationQuery": "London",
+  "departDate": "2024-12-13",
+  "returnDate": "2024-12-20",
+  "adults": 1,
+  "children": 0,
+  "infants": 0,
+  "cabinClass": "economy",
+  "currency": "MYR",
+  "market": "MY"
+}
 ```
 
-## Run tests
+**Conditions & Validation**:
+- `originQuery`: Required, string.
+- `destinationQuery`: Required, string.
+- `departDate`: Required, must be `YYYY-MM-DD`, not in the past.
+- `returnDate`: Required, must be `YYYY-MM-DD`, not earlier than `departDate`.
+- `adults`: Optional, integer ≥ 1.
+- `children`: Optional, integer ≥ 0.
+- `infants`: Optional, integer ≥ 0.
+- `cabinClass`: Optional, one of `economy`, `premium_economy`, `business`, `first`.
+- `currency`: Optional, defaults to `MYR`.
+- `market`: Optional, defaults to `MY`.
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+**Response Example**:
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "price": 5214,
+      "depature": {
+        "airline": "SriLankan Airlines",
+        "departure": "2024-12-13T14:45:00",
+        "arrival": "2024-12-14T08:40:00",
+        "stopCount": 2,
+        "segments": []
+      },
+      "return": {
+        "airline": "SriLankan Airlines",
+        "departure": "2024-12-20T20:40:00",
+        "arrival": "2024-12-22T13:45:00",
+        "stopCount": 2,
+        "segments": []
+      },
+      "departureDate": "2024-12-13",
+      "returnDate": "2024-12-20"
+    }
+  ]
+}
 ```
 
-## Deployment
+### 2. GET `/location/detect`
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+**Description**:  
+Returns the configuration data for the detected country, including market, locale, and currency.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
+**Response Example**:
+```json
+{
+  "countryCode": "MY",
+  "countryConfig": {
+    "country": "Malaysia",
+    "market": "MY",
+    "locale": "en-GB",
+    "currencyTitle": "Malaysian Ringgit",
+    "currency": "MYR",
+    "currencySymbol": "RM",
+    "site": "www.skyscanner.com.my"
+  }
+}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Swagger Documentation
 
-## Resources
+**URL**: `http://localhost:3000/docs`
 
-Check out a few resources that may come in handy when working with NestJS:
+The Swagger UI provides a visual interface to explore all endpoints, see their input/output parameters, and test them directly.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Testing
 
-## Support
+The project includes both unit and e2e tests to ensure functionality and reliability.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- **Unit tests**:
+  ```bash
+  npm run test
+  ```
+- **e2e tests**:
+  ```bash
+  npm run test:e2e
+  ```
+- **Coverage**:
+  ```bash
+  npm run test:cov
+  ```
 
-## Stay in touch
+## Additional Notes
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- **Rate Limits**: RapidAPI and Skyscanner may impose rate limits. Ensure you handle `429` (Too Many Requests) responses gracefully or consider caching frequently used data.
+- **Security**: For public endpoints, no authentication is required. If authentication or API keys for clients are needed, implement `Guards` in NestJS.
+- **Configuration Files**: JSON configuration files (like `countries-config.json`, `airports.json`) can be placed in a `data` or `assets` directory. A cron job can be used to periodically update these files.
 
-## License
+---
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This `README.md` should serve as a comprehensive guide to installing, configuring, and using this flight search API.
