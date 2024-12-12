@@ -24,7 +24,6 @@ export class FlightsService {
       dto.returnDate,
       dto.market,
       dto.currency,
-      dto.stops,
       dto.adults,
       dto.children,
       dto.infants,
