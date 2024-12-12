@@ -20,12 +20,8 @@ export class RapidApiService {
           }
         )
       );
-
-      if (!response.data.data || response.data.data.length === 0) {
-        throw new BadRequestException('Please change the location');
-      }
-
-      return response.data.data[0].presentation.id;
+      
+      return response.data.data[0]?.presentation.id;
     } catch (e) {
       console.log(e);
       throw new BadRequestException(e.response.data.message);

@@ -83,11 +83,17 @@ const exampleDepartDate = moment().add(1, 'days').format('YYYY-MM-DD').toString(
 const exampleReturnDate = moment(exampleDepartDate).add(7, 'days').format('YYYY-MM-DD').toString();
 
 export class FlightSearchDto {
-  @ApiProperty({ example: 'Kuala Lumpur' })
+  @ApiProperty({ 
+    example: 'Kuala Lumpur',
+    description: 'The origin location query, can be a city or country name (e.g., "Kuala Lumpur", "Malaysia")' 
+  })
   @IsString()
   originQuery: string;
 
-  @ApiProperty({ example: 'London' })
+  @ApiProperty({ 
+    example: 'London',
+    description: 'The destination location query, can be a city or country name (e.g., "London", "United Kingdom")' 
+  })
   @IsString()
   destinationQuery: string;
 

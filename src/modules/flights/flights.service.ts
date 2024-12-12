@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { RapidApiService } from './rapidapi/rapidapi.service';
 import { FlightSearchDto } from './dto/flight-search.dto';
 import { FlightOption, FlightLeg } from './interfaces/flight-option.interface';
@@ -9,28 +9,42 @@ export class FlightsService {
   constructor(private readonly rapidApiService: RapidApiService) {}
 
   async searchFlights(dto: FlightSearchDto): Promise<FlightOption[]> {
-    // const fromEntityId = await this.rapidApiService.getEntityId(dto.originQuery);
-    // const toEntityId = await this.rapidApiService.getEntityId(dto.destinationQuery);
+    try {
+      const [fromEntityId, toEntityId] = await Promise.all([
+        this.rapidApiService.getEntityId(dto.originQuery),
+        this.rapidApiService.getEntityId(dto.destinationQuery)
+      ]);
 
-    const [fromEntityId, toEntityId] = await Promise.all([
-      this.rapidApiService.getEntityId(dto.originQuery),
-      this.rapidApiService.getEntityId(dto.destinationQuery)
-    ]);
+      if (!fromEntityId) {
+        throw new BadRequestException('Invalid origin location. Please change the location');
+      }
 
-    const rawData = await this.rapidApiService.searchRoundtrip(
-      fromEntityId,
-      toEntityId,
-      dto.departDate,
-      dto.returnDate,
-      dto.market,
-      dto.currency,
-      dto.adults,
-      dto.children,
-      dto.infants,
-      dto.cabinClass
-    );
+      if (!toEntityId) {
+        throw new BadRequestException('Invalid destination location. Please change the location');
+      }
 
-    return this.transformFlightData(rawData);
+      const rawData = await this.rapidApiService.searchRoundtrip(
+        fromEntityId,
+        toEntityId,
+        dto.departDate,
+        dto.returnDate,
+        dto.market,
+        dto.currency,
+        dto.adults,
+        dto.children,
+        dto.infants,
+        dto.cabinClass
+      );
+
+      return this.transformFlightData(rawData);
+    } catch (error) {
+      // If the error is already an HttpException (like BadRequestException), just rethrow
+      if (error instanceof HttpException || error instanceof BadRequestException) {
+        throw error;
+      } else {
+        throw new InternalServerErrorException('An error occurred while searching flights.');
+      }
+    }
   }
 
   // Private helper method to transform the raw RapidAPI data

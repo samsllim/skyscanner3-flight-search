@@ -1,7 +1,17 @@
-import { Controller, Post, Body, UsePipes, ValidationPipe, UseGuards } from '@nestjs/common';
+import { 
+  Controller, 
+  Post, 
+  Body, 
+  UsePipes, 
+  ValidationPipe, 
+  UseGuards, 
+  InternalServerErrorException, 
+  HttpException, 
+  BadRequestException
+} from '@nestjs/common';
 import { FlightsService } from './flights.service';
 import { FlightSearchDto } from './dto/flight-search.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ApiKeyGuard } from '../../common/guards/api-key.guard';
 
 @ApiTags('Flights')
@@ -12,14 +22,23 @@ export class FlightsController {
   @Post()
   @ApiOperation({ summary: 'Search for roundtrip flights' })
   @ApiResponse({ status: 200, description: 'Flights retrieved successfully.' })
-  // BONUS: Protect Endpoint - using an API Key Guard as an example
   @UseGuards(ApiKeyGuard)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   async searchFlights(@Body() dto: FlightSearchDto) {
-    const result = await this.flightsService.searchFlights(dto);
-    return {
-      status: 'success',
-      data: result
-    };
+    try {
+      const result = await this.flightsService.searchFlights(dto);
+      return {
+        status: 'success',
+        data: result
+      };
+    } catch (error) {
+      // Check if it's an HttpException thrown by the service
+      if (error instanceof HttpException || error instanceof BadRequestException) {
+        // Rethrow the known HTTP exception so Nest can handle it appropriately
+        throw error;
+      }
+      // Otherwise, throw a generic 500 error
+      throw new InternalServerErrorException('An unexpected error occurred.');
+    }
   }
 }

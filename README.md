@@ -81,8 +81,8 @@ Search for round-trip flights using the Skyscanner RapidAPI integration.
 ```
 
 **Conditions & Validation**:
-- `originQuery`: Required, string.
-- `destinationQuery`: Required, string.
+- `originQuery`: Required, string (city or country name e.g., "Kuala Lumpur", "Malaysia").
+- `destinationQuery`: Required, string (city or country name e.g., "Kuala Lumpur", "Malaysia").
 - `departDate`: Required, must be `YYYY-MM-DD`, not in the past.
 - `returnDate`: Required, must be `YYYY-MM-DD`, not earlier than `departDate`.
 - `adults`: Optional, integer ≥ 1.
