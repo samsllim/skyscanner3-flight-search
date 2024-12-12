@@ -7,9 +7,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 export class LocationController {
   constructor(private readonly locationsService: LocationsService) {}
   @Get('detect')
-  async detectLocation(@Req() request: Request, @Ip() ipAddress: string) {
-    const ip = request.headers['x-forwarded-for'] || ipAddress;
-
-    return this.locationsService.getLocationDetails(ip);
+  async detectLocation(@Ip() ipAddress: string) {
+    return this.locationsService.getLocationDetails(ipAddress);
   }
 }

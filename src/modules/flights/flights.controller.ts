@@ -2,7 +2,7 @@ import { Controller, Post, Body, UsePipes, ValidationPipe, UseGuards } from '@ne
 import { FlightsService } from './flights.service';
 import { FlightSearchDto } from './dto/flight-search.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { ApiKeyGuard } from 'src/common/guards/api-key.guard';
+import { ApiKeyGuard } from '../../common/guards/api-key.guard';
 
 @ApiTags('Flights')
 @Controller('search-flight')
