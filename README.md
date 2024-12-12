@@ -22,27 +22,27 @@ This project provides an API to search for round-trip flights using data from th
 ## Installation
 
 1. **Clone the repository**:
-   ```bash
-   git clone git@github.com:samsllim/skyscanner3-flight-search.git
-   cd skyscanner3-flight-search
-   ```
+  ```bash
+  git clone git@github.com:samsllim/skyscanner3-flight-search.git
+  cd skyscanner3-flight-search
+  ```
 
 2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+  ```bash
+  npm install
+  ```
 
 3. **Compile and run the project**:
-   ```bash
+  ```bash
   # development
-  $ npm run start
+  npm run start
 
   # watch mode
-  $ npm run start:dev
+  npm run start:dev
 
   # production mode
-  $ npm run start:prod
-   ```
+  npm run start:prod
+  ```
 
   By default, the server runs on `http://localhost:3000`.
 
@@ -159,16 +159,12 @@ The project includes both unit and e2e tests to ensure functionality and reliabi
   ```bash
   npm run test:e2e
   ```
-- **Coverage**:
-  ```bash
-  npm run test:cov
-  ```
 
 ## Additional Notes
 
 - **Rate Limits**: RapidAPI and Skyscanner may impose rate limits. Ensure you handle `429` (Too Many Requests) responses gracefully or consider caching frequently used data.
 - **Security**: For public endpoints, no authentication is required. If authentication or API keys for clients are needed, implement `Guards` in NestJS.
-- **Configuration Files**: JSON configuration files (like `countries-config.json`, `airports.json`) can be placed in a `data` or `assets` directory. A cron job can be used to periodically update these files.
+- **Configuration Files**: JSON configuration files (like `countries-config.json`) can be placed in a `data` directory. A cron job can be used to periodically update these files.
 
 ---
 
