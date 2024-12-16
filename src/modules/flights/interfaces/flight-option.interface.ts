@@ -9,6 +9,7 @@ interface FlightLeg{
 
 interface FlightOption {
   price: number;
+  currency: string;
   depature: FlightLeg;
   return: FlightLeg;
   departureDate: string; // "YYYY-MM-DD"

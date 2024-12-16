@@ -7,7 +7,6 @@ import {
   UseGuards, 
   InternalServerErrorException, 
   HttpException, 
-  BadRequestException
 } from '@nestjs/common';
 import { FlightsService } from './flights.service';
 import { FlightSearchDto } from './dto/flight-search.dto';
@@ -32,12 +31,9 @@ export class FlightsController {
         data: result
       };
     } catch (error) {
-      // Check if it's an HttpException thrown by the service
-      if (error instanceof HttpException || error instanceof BadRequestException) {
-        // Rethrow the known HTTP exception so Nest can handle it appropriately
+      if (error instanceof HttpException) {
         throw error;
       }
-      // Otherwise, throw a generic 500 error
       throw new InternalServerErrorException('An unexpected error occurred.');
     }
   }

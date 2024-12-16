@@ -20,7 +20,6 @@ export class LocationsService {
   private countriesConfig: CountryConfig[];
 
   constructor(private readonly httpService: HttpService) {
-    // Load countries configuration from JSON file on service initialization
     this.loadCountriesConfig();
   }
 
@@ -100,13 +99,5 @@ export class LocationsService {
       countryCode,
       countryConfig
     };
-  }
-
-  /**
-   * List all available countries
-   * @returns Array of country configurations
-   */
-  listAllCountries(): CountryConfig[] {
-    return this.countriesConfig;
   }
 }

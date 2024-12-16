@@ -80,7 +80,7 @@ export function IsReturnDateValid(validationOptions?: ValidationOptions) {
 }
 
 const exampleDepartDate = moment().add(1, 'days').format('YYYY-MM-DD').toString();
-const exampleReturnDate = moment(exampleDepartDate).add(7, 'days').format('YYYY-MM-DD').toString();
+const exampleReturnDate = moment(exampleDepartDate).add(3, 'days').format('YYYY-MM-DD').toString();
 
 export class FlightSearchDto {
   @ApiProperty({ 

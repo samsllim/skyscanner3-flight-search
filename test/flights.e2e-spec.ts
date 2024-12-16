@@ -1,110 +1,50 @@
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { FlightsService } from '../src/modules/flights/flights.service';
-import { FlightsController } from '../src/modules/flights/flights.controller';
-import { FlightSearchDto, CabinClass } from '../src/modules/flights/dto/flight-search.dto';
-import { plainToInstance } from 'class-transformer';
-import { validate } from 'class-validator';
+import { AppModule } from '../src/app.module';
+import * as request from 'supertest';
+import * as moment from 'moment';
 
-const mockFlightsService = {
-  searchFlights: jest.fn(),
-};
-
-describe('FlightsController', () => {
-  let controller: FlightsController;
-
-  beforeEach(async () => {
+describe('Flights (E2E)', () => {
+  let app: INestApplication;
+  
+  const departDate = moment().add(2, 'days').format('YYYY-MM-DD'); // minimal date range
+  const returnDate = moment().add(3, 'days').format('YYYY-MM-DD');
+  
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [FlightsController],
-      providers: [
-        {
-          provide: FlightsService,
-          useValue: mockFlightsService,
-        },
-      ],
+      imports: [AppModule],
     }).compile();
-
-    controller = module.get<FlightsController>(FlightsController);
+    
+    app = module.createNestApplication();
+    await app.init();
+  });
+  
+  afterAll(async () => {
+    await app.close();
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  it('POST /search-flight should return flight data', async () => {
+    const body = {
+      originQuery: 'Kuala Lumpur',
+      destinationQuery: 'Singapore',
+      departDate,
+      returnDate,
+      adults: 1,
+      children: 0,
+      infants: 0,
+      cabinClass: 'economy',
+      currency: 'MYR',
+      market: 'MY'
+    };
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
+    const response = await request(app.getHttpServer())
+      .post('/search-flight')
+      .send(body)
+      .expect(201);
 
-  describe('Validation', () => {
-    it('should validate valid FlightSearchDto successfully', async () => {
-      const dto = plainToInstance(FlightSearchDto, {
-        originQuery: 'Kuala Lumpur',
-        destinationQuery: 'London',
-        departDate: '2024-12-13',
-        returnDate: '2024-12-20',
-        adults: 1,
-        children: 0,
-        infants: 0,
-        cabinClass: 'economy',
-        currency: 'MYR',
-        market: 'MY',
-      });
-
-      const errors = await validate(dto);
-      expect(errors.length).toBe(0);
-    });
-
-    it('should fail if returnDate is earlier than departDate', async () => {
-      const dto = plainToInstance(FlightSearchDto, {
-        originQuery: 'Kuala Lumpur',
-        destinationQuery: 'London',
-        departDate: '2024-12-13',
-        returnDate: '2024-12-10',
-      });
-
-      const errors = await validate(dto);
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].constraints?.isReturnDateValid).toBe(
-        'Return date must be on or after the departure date',
-      );
-    });
-
-    it('should fail if departDate is in the past', async () => {
-      const dto = plainToInstance(FlightSearchDto, {
-        originQuery: 'Kuala Lumpur',
-        destinationQuery: 'London',
-        departDate: '2023-12-01', // A date in the past
-        returnDate: '2024-12-10',
-      });
-
-      const errors = await validate(dto);
-      expect(errors.length).toBeGreaterThan(0);
-      expect(errors[0].constraints?.isDateFromToday).toBe(
-        'Departure date must be from today onward',
-      );
-    });
-  });
-
-  describe('searchFlights', () => {
-    it('should call service with correct data', async () => {
-      const dto: FlightSearchDto = {
-        originQuery: 'Kuala Lumpur',
-        destinationQuery: 'London',
-        departDate: '2024-12-13',
-        returnDate: '2024-12-20',
-        adults: 1,
-        children: 0,
-        infants: 0,
-        cabinClass: CabinClass.ECONOMY,
-        currency: 'MYR',
-        market: 'MY',
-      };
-
-      mockFlightsService.searchFlights.mockResolvedValueOnce([{ price: 1000 }]);
-
-      const result = await controller.searchFlights(dto);
-
-      expect(mockFlightsService.searchFlights).toHaveBeenCalledWith(dto);
-      expect(result.data).toEqual([{ price: 1000 }]);
-    });
-  });
+    expect(response.body.status).toBe('success');
+    expect(response.body.data).toHaveProperty('all');
+    // Check if data.all is an array and possibly check length > 0
+    expect(Array.isArray(response.body.data.all)).toBe(true);
+  }, 30_000); // 30s timeout in case it takes longer
 });

@@ -23,8 +23,8 @@ export class RapidApiService {
       
       return response.data.data[0]?.presentation.id;
     } catch (e) {
-      console.log(e);
-      throw new BadRequestException(e.response.data.message);
+      const errMsg = e?.response?.data?.message || 'Failed to fetch data from RapidAPI';
+      throw new BadRequestException(errMsg);
     }
   }
 
@@ -45,8 +45,8 @@ export class RapidApiService {
 
       return response.data;
     } catch (e) {
-      console.log(e);
-      throw new BadRequestException(e.response.data.message);
+      const errMsg = e?.response?.data?.message || 'Failed to fetch data from RapidAPI';
+      throw new BadRequestException(errMsg);
     }
   }
 }
