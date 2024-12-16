@@ -40,7 +40,7 @@ describe('Flights (E2E)', () => {
     const response = await request(app.getHttpServer())
       .post('/search-flight')
       .send(body)
-      .expect(201);
+      .expect(200);
 
     expect(response.body.status).toBe('success');
     expect(response.body.data).toHaveProperty('all');

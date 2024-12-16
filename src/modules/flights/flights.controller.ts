@@ -7,6 +7,7 @@ import {
   UseGuards, 
   InternalServerErrorException, 
   HttpException, 
+  HttpCode
 } from '@nestjs/common';
 import { FlightsService } from './flights.service';
 import { FlightSearchDto } from './dto/flight-search.dto';
@@ -19,6 +20,7 @@ export class FlightsController {
   constructor(private readonly flightsService: FlightsService) {}
 
   @Post()
+  @HttpCode(200)
   @ApiOperation({ summary: 'Search for roundtrip flights' })
   @ApiResponse({ status: 200, description: 'Flights retrieved successfully.' })
   @UseGuards(ApiKeyGuard)
